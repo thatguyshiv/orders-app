@@ -89,6 +89,33 @@ if menu == "Add Order":
             orders_df.to_excel(orders_file, index=False)
             st.success("Order added successfully!")
 
+elif menu == "Add Product":
+    st.header("Add New Product")
+    
+    # Form for adding a new product
+    with st.form("add_product_form"):
+        product_code = st.text_input("Product Code")
+        product_name = st.text_input("Product Name")
+        grams_used = st.number_input("Grams Used", min_value=0.0)
+        sale_price = st.number_input("Sale Price", min_value=0.0)
+        submit = st.form_submit_button("Add Product")
+
+    if submit:
+        # Prevent duplicate product codes or names
+        if product_code in product_df['Product Code'].values or product_name in product_df['Product Name'].values:
+            st.error("Error: Product already exists.")
+        else:
+            # Add product to the product database
+            new_product = {
+                'Product Code': product_code,
+                'Product Name': product_name,
+                'Grams Used': grams_used,
+                'Sale Price': sale_price
+            }
+            product_df = product_df.append(new_product, ignore_index=True)
+            product_df.to_excel(product_db_file, index=False)
+            st.success("Product added successfully!")
+
 elif menu == "Update Order":
     st.header("Update Existing Order")
 
