@@ -102,11 +102,18 @@ elif menu == "Update Order":
         if filtered_orders.empty:
             st.error("No orders found matching the search criteria.")
         else:
-            # Display the order to be updated
-            order_index = filtered_orders.index[0]
-            order_to_update = filtered_orders.iloc[0]
+            st.write(f"Found {len(filtered_orders)} matching orders:")
+            st.dataframe(filtered_orders)  # Display all matching orders
+            
+            # Add a dropdown to select an order
+            order_index = st.selectbox(
+                "Select an order to edit",
+                options=filtered_orders.index,
+                format_func=lambda i: f"{filtered_orders.loc[i, 'Customer Name']} - {filtered_orders.loc[i, 'Product Code']}"
+            )
 
-            # Editable form
+            # Load the selected order into an editable form
+            order_to_update = orders_df.loc[order_index]
             with st.form("update_order_form"):
                 st.write("Update the order details below:")
                 customer_name = st.text_input("Customer Name", value=order_to_update["Customer Name"])
