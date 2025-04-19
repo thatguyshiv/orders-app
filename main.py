@@ -86,6 +86,9 @@ if menu == "Add Order":
         submit = st.form_submit_button("Add Order")
 
     if submit:
+        # Declare global orders_df before using or modifying it
+        global orders_df
+
         # Fetch product details
         product = product_df.loc[product_df['Product Code'] == product_code]
         if product.empty:
@@ -97,16 +100,8 @@ if menu == "Add Order":
         grams_used = product['Grams Used'].values[0]
         sale_price = product['Sale Price'].values[0]
 
-        # Debugging: Display retrieved product details
-        st.write("Product Details:")
-        st.write("Grams Used:", grams_used)
-        st.write("Sale Price:", sale_price)
-
         # Retrieve filament cost per gram (default to 0.10 if color is not found)
         filament_cost_per_gram = filament_costs.get(filament_color, 0.10)
-
-        # Debugging: Display filament cost per gram
-        st.write("Filament Cost Per Gram:", filament_cost_per_gram)
 
         # Ensure all values are numeric
         try:
@@ -120,10 +115,6 @@ if menu == "Add Order":
         # Calculate cost and profit
         cost = grams_used * filament_cost_per_gram
         profit = sale_price - cost
-
-        # Debugging: Display calculated cost and profit
-        st.write("Calculated Cost:", cost)
-        st.write("Calculated Profit:", profit)
 
         # Automatically check "Is Printed" if "Is Delivered" is checked
         if is_delivered:
@@ -149,7 +140,6 @@ if menu == "Add Order":
             'Message': message
         }
         new_order_df = pd.DataFrame([new_order])  # Create DataFrame from the new order dictionary
-        global orders_df  # Ensure orders_df is updated globally
         orders_df = pd.concat([orders_df, new_order_df], ignore_index=True)  # Concatenate new order to existing DataFrame
         orders_df.to_excel(orders_file, index=False)  # Save the updated DataFrame to the Excel file
         st.success("Order added successfully!")
