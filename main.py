@@ -17,7 +17,7 @@ except FileNotFoundError:
 order_columns = [
     'Customer Name', 'Product Code', 'Product Name', 'Filament Color',
     'Order Date', 'Delivery Date', 'Assigned To', 'Cost', 'Profit',
-    'Is Printed', 'Is Delivered'
+    'Is Printed', 'Is Delivered', 'Message'
 ]
 try:
     orders_df = pd.read_excel(orders_file)
@@ -32,11 +32,11 @@ except FileNotFoundError:
 # Streamlit App
 st.title("Order Management System")
 
-menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products"])
+menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order"])
 
 if menu == "Add Order":
     st.header("Add New Order")
-
+    
     # Form for adding order
     with st.form("add_order_form"):
         customer_name = st.text_input("Customer Name")
@@ -45,6 +45,7 @@ if menu == "Add Order":
         order_date = st.date_input("Order Date")
         delivery_date = st.date_input("Delivery Date")
         assigned_to = st.text_input("Assigned To")
+        message = st.text_area("Message (optional)")
         is_printed = st.checkbox("Is Printed")
         is_delivered = st.checkbox("Is Delivered")
         submit = st.form_submit_button("Add Order")
@@ -58,7 +59,7 @@ if menu == "Add Order":
             product_name = product['Product Name'].values[0]
             grams_used = product['Grams Used'].values[0]
             sale_price = product['Sale Price'].values[0]
-            cost = grams_used * filament_color.lower()  # Assumes filament cost logic in dictionary (adjust as needed)
+            cost = grams_used * 0.10  # Example: fixed cost per gram
             profit = sale_price - cost
 
             # Automatically check "Is Printed" if "Is Delivered" is checked
@@ -77,37 +78,62 @@ if menu == "Add Order":
                 'Cost': cost,
                 'Profit': profit,
                 'Is Printed': is_printed,
-                'Is Delivered': is_delivered
+                'Is Delivered': is_delivered,
+                'Message': message
             }
             orders_df = orders_df.append(new_order, ignore_index=True)
             orders_df.to_excel(orders_file, index=False)
             st.success("Order added successfully!")
 
-elif menu == "Add Product":
-    st.header("Add New Product")
+elif menu == "Update Order":
+    st.header("Update Existing Order")
 
-    # Form for adding product
-    with st.form("add_product_form"):
-        product_code = st.text_input("Product Code")
-        product_name = st.text_input("Product Name")
-        grams_used = st.number_input("Grams Used", min_value=0.0)
-        sale_price = st.number_input("Sale Price", min_value=0.0)
-        submit = st.form_submit_button("Add Product")
+    # Search for an order
+    search_by = st.radio("Search by", ["Product Code", "Customer Name"])
+    search_value = st.text_input(f"Enter {search_by}")
 
-    if submit:
-        # Prevent duplicate product codes or names
-        if product_code in product_df['Product Code'].values or product_name in product_df['Product Name'].values:
-            st.error("Error: Product already exists.")
+    if st.button("Search"):
+        # Filter the orders based on the search criteria
+        if search_by == "Product Code":
+            filtered_orders = orders_df.loc[orders_df['Product Code'] == search_value]
         else:
-            new_product = {
-                'Product Code': product_code,
-                'Product Name': product_name,
-                'Grams Used': grams_used,
-                'Sale Price': sale_price
-            }
-            product_df = product_df.append(new_product, ignore_index=True)
-            product_df.to_excel(product_db_file, index=False)
-            st.success("Product added successfully!")
+            filtered_orders = orders_df.loc[orders_df['Customer Name'] == search_value]
+        
+        if filtered_orders.empty:
+            st.error("No orders found matching the search criteria.")
+        else:
+            # Display the order to be updated
+            order_index = filtered_orders.index[0]
+            order_to_update = filtered_orders.iloc[0]
+
+            # Editable form
+            with st.form("update_order_form"):
+                st.write("Update the order details below:")
+                customer_name = st.text_input("Customer Name", value=order_to_update["Customer Name"])
+                product_code = st.text_input("Product Code", value=order_to_update["Product Code"], disabled=True)
+                filament_color = st.text_input("Filament Color", value=order_to_update["Filament Color"])
+                order_date = st.date_input("Order Date", value=pd.to_datetime(order_to_update["Order Date"]))
+                delivery_date = st.date_input("Delivery Date", value=pd.to_datetime(order_to_update["Delivery Date"]))
+                assigned_to = st.text_input("Assigned To", value=order_to_update["Assigned To"])
+                message = st.text_area("Message", value=order_to_update["Message"])
+                is_printed = st.checkbox("Is Printed", value=order_to_update["Is Printed"])
+                is_delivered = st.checkbox("Is Delivered", value=order_to_update["Is Delivered"])
+                update = st.form_submit_button("Update Order")
+
+            if update:
+                # Update the DataFrame
+                orders_df.at[order_index, "Customer Name"] = customer_name
+                orders_df.at[order_index, "Filament Color"] = filament_color
+                orders_df.at[order_index, "Order Date"] = order_date
+                orders_df.at[order_index, "Delivery Date"] = delivery_date
+                orders_df.at[order_index, "Assigned To"] = assigned_to
+                orders_df.at[order_index, "Is Printed"] = is_printed
+                orders_df.at[order_index, "Is Delivered"] = is_delivered
+                orders_df.at[order_index, "Message"] = message
+
+                # Save the updated orders to Excel
+                orders_df.to_excel(orders_file, index=False)
+                st.success("Order updated successfully!")
 
 elif menu == "View Orders":
     st.header("View Orders")
