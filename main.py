@@ -69,7 +69,7 @@ st.title("Order Management System")
 
 menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order", "Update Product", "Update Filament Costs"])
 
-if menu == "Add Order":
+elif menu == "Add Order":
     st.header("Add New Order")
     
     # Form for adding order
@@ -90,66 +90,69 @@ if menu == "Add Order":
         product = product_df.loc[product_df['Product Code'] == product_code]
         if product.empty:
             st.error("Error: Product not found. Please add the product first.")
-        else:
-            product_name = product['Product Name'].values[0]
-            grams_used = product['Grams Used'].values[0]
-            sale_price = product['Sale Price'].values[0]
+            return  # Exit the execution early to prevent further processing
 
-            # Debugging: Display retrieved product details
-            st.write("Product Details:")
-            st.write("Grams Used:", grams_used)
-            st.write("Sale Price:", sale_price)
+        # Retrieve product details
+        product_name = product['Product Name'].values[0]
+        grams_used = product['Grams Used'].values[0]
+        sale_price = product['Sale Price'].values[0]
 
-            # Retrieve filament cost per gram (default to 0.10 if color is not found)
-            filament_cost_per_gram = filament_costs.get(filament_color, 0.10)
+        # Debugging: Display retrieved product details
+        st.write("Product Details:")
+        st.write("Grams Used:", grams_used)
+        st.write("Sale Price:", sale_price)
 
-            # Debugging: Display filament cost per gram
-            st.write("Filament Cost Per Gram:", filament_cost_per_gram)
+        # Retrieve filament cost per gram (default to 0.10 if color is not found)
+        filament_cost_per_gram = filament_costs.get(filament_color, 0.10)
 
-            # Ensure all values are numeric
-            try:
-                grams_used = float(grams_used)
-                filament_cost_per_gram = float(filament_cost_per_gram)
-                sale_price = float(sale_price)
-            except ValueError:
-                st.error("Error: Invalid numeric values for calculations.")
-                return
+        # Debugging: Display filament cost per gram
+        st.write("Filament Cost Per Gram:", filament_cost_per_gram)
 
-            # Calculate cost and profit
-            cost = grams_used * filament_cost_per_gram
-            profit = sale_price - cost
+        # Ensure all values are numeric
+        try:
+            grams_used = float(grams_used)
+            filament_cost_per_gram = float(filament_cost_per_gram)
+            sale_price = float(sale_price)
+        except ValueError:
+            st.error("Error: Invalid numeric values for calculations.")
+            return
 
-            # Debugging: Display calculated cost and profit
-            st.write("Calculated Cost:", cost)
-            st.write("Calculated Profit:", profit)
+        # Calculate cost and profit
+        cost = grams_used * filament_cost_per_gram
+        profit = sale_price - cost
 
-            # Automatically check "Is Printed" if "Is Delivered" is checked
-            if is_delivered:
-                is_printed = True
+        # Debugging: Display calculated cost and profit
+        st.write("Calculated Cost:", cost)
+        st.write("Calculated Profit:", profit)
 
-            # Convert boolean values to "Y" or "N"
-            is_printed = "Y" if is_printed else "N"
-            is_delivered = "Y" if is_delivered else "N"
+        # Automatically check "Is Printed" if "Is Delivered" is checked
+        if is_delivered:
+            is_printed = True
 
-            # Add order to DataFrame
-            new_order = {
-                'Customer Name': customer_name,
-                'Product Code': product_code,
-                'Product Name': product_name,
-                'Filament Color': filament_color,
-                'Order Date': order_date,
-                'Delivery Date': delivery_date,
-                'Assigned To': assigned_to,
-                'Cost': cost,
-                'Profit': profit,
-                'Is Printed': is_printed,
-                'Is Delivered': is_delivered,
-                'Message': message
-            }
-            new_order_df = pd.DataFrame([new_order])  # Create DataFrame from the new order dictionary
-            orders_df = pd.concat([orders_df, new_order_df], ignore_index=True)  # Concatenate new order to existing DataFrame
-            orders_df.to_excel(orders_file, index=False)  # Save the updated DataFrame to the Excel file
-            st.success("Order added successfully!")
+        # Convert boolean values to "Y" or "N"
+        is_printed = "Y" if is_printed else "N"
+        is_delivered = "Y" if is_delivered else "N"
+
+        # Add order to DataFrame
+        new_order = {
+            'Customer Name': customer_name,
+            'Product Code': product_code,
+            'Product Name': product_name,
+            'Filament Color': filament_color,
+            'Order Date': order_date,
+            'Delivery Date': delivery_date,
+            'Assigned To': assigned_to,
+            'Cost': cost,
+            'Profit': profit,
+            'Is Printed': is_printed,
+            'Is Delivered': is_delivered,
+            'Message': message
+        }
+        new_order_df = pd.DataFrame([new_order])  # Create DataFrame from the new order dictionary
+        global orders_df  # Ensure orders_df is updated globally
+        orders_df = pd.concat([orders_df, new_order_df], ignore_index=True)  # Concatenate new order to existing DataFrame
+        orders_df.to_excel(orders_file, index=False)  # Save the updated DataFrame to the Excel file
+        st.success("Order added successfully!")
 
 elif menu == "Add Product":
     st.header("Add New Product")
