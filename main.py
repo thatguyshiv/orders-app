@@ -206,3 +206,35 @@ elif menu == "Update Filament Costs":
     st.table(filament_costs_df)
 
     # Form for updating existing costs
+    st.subheader("Update Existing Color Cost")
+    with st.form("update_cost_form"):
+        color_to_update = st.selectbox("Select a Color", list(filament_costs.keys()))
+        new_cost = st.number_input(f"New Cost for {color_to_update}", min_value=0.0)
+        update_cost = st.form_submit_button("Update Cost")
+    
+    if update_cost:
+        if color_to_update:
+            # Update the cost in the filament costs dictionary
+            filament_costs[color_to_update] = new_cost
+            # Save updated costs to file
+            filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
+            filament_costs_df.to_csv(filament_costs_file, index=False)
+            st.success(f"The cost for {color_to_update} has been updated to {new_cost:.2f}!")
+
+    # Form for adding a new color
+    st.subheader("Add New Filament Color")
+    with st.form("add_color_form"):
+        new_color = st.text_input("New Color Name")
+        new_color_cost = st.number_input(f"Cost for {new_color}", min_value=0.0)
+        add_color = st.form_submit_button("Add New Color")
+
+    if add_color:
+        if new_color in filament_costs:
+            st.error(f"The color {new_color} already exists.")
+        else:
+            # Add the new color and its cost
+            filament_costs[new_color] = new_color_cost
+            # Save updated costs to file
+            filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
+            filament_costs_df.to_csv(filament_costs_file, index=False)
+            st.success(f"The new color {new_color} has been added with a cost of {new_color_cost:.2f}.")
