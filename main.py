@@ -54,9 +54,10 @@ order_columns = [
 ]
 if os.path.exists(orders_file):
     # If the file exists, load it
-    global orders_df
+    
 
     try:
+        global orders_df
         orders_df = pd.read_excel(orders_file)
     except Exception as e:
         st.error(f"Error reading {orders_file}: {e}")
