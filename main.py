@@ -217,6 +217,53 @@ elif menu == "Update Order":
                 orders_df.to_excel(orders_file, index=False)
                 st.success("Order updated successfully!")
 
+elif menu == "Update Product":
+    st.header("Update Existing Product")
+    
+    # Search for a product
+    search_by = st.radio("Search by", ["Product Code", "Product Name"])
+    search_value = st.text_input(f"Enter {search_by}")
+    
+    if st.button("Search"):
+        # Filter the products based on the search criteria
+        if search_by == "Product Code":
+            filtered_products = product_df.loc[product_df['Product Code'] == search_value]
+        else:
+            filtered_products = product_df.loc[product_df['Product Name'] == search_value]
+        
+        if filtered_products.empty:
+            st.error("No products found matching the search criteria.")
+        else:
+            st.write(f"Found {len(filtered_products)} matching products:")
+            st.dataframe(filtered_products)  # Display all matching products
+            
+            # Add a dropdown to select a product
+            product_index = st.selectbox(
+                "Select a product to edit",
+                options=filtered_products.index,
+                format_func=lambda i: f"{filtered_products.loc[i, 'Product Name']} - {filtered_products.loc[i, 'Product Code']}"
+            )
+            
+            # Load the selected product into an editable form
+            product_to_update = product_df.loc[product_index]
+            with st.form("update_product_form"):
+                st.write("Update the product details below:")
+                product_code = st.text_input("Product Code", value=product_to_update["Product Code"], disabled=True)
+                product_name = st.text_input("Product Name", value=product_to_update["Product Name"])
+                grams_used = st.number_input("Grams Used", value=product_to_update["Grams Used"], min_value=0.0)
+                sale_price = st.number_input("Sale Price", value=product_to_update["Sale Price"], min_value=0.0)
+                update = st.form_submit_button("Update Product")
+            
+            if update:
+                # Update the DataFrame
+                product_df.at[product_index, "Product Name"] = product_name
+                product_df.at[product_index, "Grams Used"] = grams_used
+                product_df.at[product_index, "Sale Price"] = sale_price
+
+                # Save the updated products to Excel
+                product_df.to_excel(product_db_file, index=False)
+                st.success("Product updated successfully!")
+
 elif menu == "Update Filament Costs":
     st.header("Update Filament Costs")
 
