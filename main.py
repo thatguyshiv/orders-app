@@ -6,7 +6,7 @@ product_db_file = 'product_database.xlsx'
 orders_file = 'orders.xlsx'
 filament_costs_file = 'filament_costs.csv'
 
-# Default filament costs (if the file doesn't exist)
+# Default filament costs
 default_filament_costs = {
     "Blue": 0.10,
     "Pink": 0.12,
@@ -18,7 +18,7 @@ default_filament_costs = {
 try:
     filament_costs_df = pd.read_csv(filament_costs_file)
     filament_costs = dict(zip(filament_costs_df['Color'], filament_costs_df['Cost']))
-except FileNotFoundError:
+except (FileNotFoundError, pd.errors.EmptyDataError):
     # Create default filament costs file
     filament_costs_df = pd.DataFrame(list(default_filament_costs.items()), columns=['Color', 'Cost'])
     filament_costs_df.to_csv(filament_costs_file, index=False)
@@ -136,6 +136,26 @@ elif menu == "Add Product":
             product_df.to_excel(product_db_file, index=False)
             st.success("Product added successfully!")
 
+elif menu == "View Orders":
+    st.header("View Orders")
+    
+    try:
+        orders_df = pd.read_excel(orders_file)
+        st.subheader("Order Details")
+        st.dataframe(orders_df)  # Display orders in a table format
+    except FileNotFoundError:
+        st.error("The orders file is missing. Please add orders to create the file.")
+
+elif menu == "View Products":
+    st.header("View Products")
+    
+    try:
+        product_df = pd.read_excel(product_db_file)
+        st.subheader("Product Details")
+        st.dataframe(product_df)  # Display products in a table format
+    except FileNotFoundError:
+        st.error("The product database file is missing. Please add products to create the file.")
+
 elif menu == "Update Order":
     st.header("Update Existing Order")
 
@@ -189,52 +209,4 @@ elif menu == "Update Order":
                 orders_df.at[order_index, "Order Date"] = order_date
                 orders_df.at[order_index, "Delivery Date"] = delivery_date
                 orders_df.at[order_index, "Assigned To"] = assigned_to
-                orders_df.at[order_index, "Is Printed"] = is_printed
-                orders_df.at[order_index, "Is Delivered"] = is_delivered
-                orders_df.at[order_index, "Message"] = message
-
-                # Save the updated orders to Excel
-                orders_df.to_excel(orders_file, index=False)
-                st.success("Order updated successfully!")
-
-elif menu == "Update Filament Costs":
-    st.header("Update Filament Costs")
-
-    # Display current filament costs
-    st.subheader("Current Filament Costs")
-    filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
-    st.table(filament_costs_df)
-
-    # Form for updating existing costs
-    st.subheader("Update Existing Color Cost")
-    with st.form("update_cost_form"):
-        color_to_update = st.selectbox("Select a Color", list(filament_costs.keys()))
-        new_cost = st.number_input(f"New Cost for {color_to_update}", min_value=0.0)
-        update_cost = st.form_submit_button("Update Cost")
-    
-    if update_cost:
-        if color_to_update:
-            # Update the cost in the filament costs dictionary
-            filament_costs[color_to_update] = new_cost
-            # Save updated costs to file
-            filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
-            filament_costs_df.to_csv(filament_costs_file, index=False)
-            st.success(f"The cost for {color_to_update} has been updated to {new_cost:.2f}!")
-
-    # Form for adding a new color
-    st.subheader("Add New Filament Color")
-    with st.form("add_color_form"):
-        new_color = st.text_input("New Color Name")
-        new_color_cost = st.number_input(f"Cost for {new_color}", min_value=0.0)
-        add_color = st.form_submit_button("Add New Color")
-
-    if add_color:
-        if new_color in filament_costs:
-            st.error(f"The color {new_color} already exists.")
-        else:
-            # Add the new color and its cost
-            filament_costs[new_color] = new_color_cost
-            # Save updated costs to file
-            filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
-            filament_costs_df.to_csv(filament_costs_file, index=False)
-            st.success(f"The new color {new_color} has been added with a cost of {new_color_cost:.2f}.")
+                orders_df.at
