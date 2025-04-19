@@ -252,8 +252,16 @@ elif menu == "Update Product":
                 st.write("Update the product details below:")
                 product_code = st.text_input("Product Code", value=product_to_update["Product Code"], disabled=True)
                 product_name = st.text_input("Product Name", value=product_to_update["Product Name"])
-                grams_used = st.number_input("Grams Used", value=product_to_update["Grams Used"], min_value=0.0)
-                sale_price = st.number_input("Sale Price", value=product_to_update["Sale Price"], min_value=0.0)
+                grams_used = st.number_input(
+                    "Grams Used",
+                    value=float(product_to_update["Grams Used"]),  # Ensure consistency
+                    min_value=0.0
+                )
+                sale_price = st.number_input(
+                    "Sale Price",
+                    value=float(product_to_update["Sale Price"]),  # Ensure consistency
+                    min_value=0.0
+                )
                 update = st.form_submit_button("Update Product")
             
             if update:
@@ -265,7 +273,6 @@ elif menu == "Update Product":
                 # Save the updated products to Excel
                 product_df.to_excel(product_db_file, index=False)
                 st.success("Product updated successfully!")
-
 elif menu == "Update Filament Costs":
     st.header("Update Filament Costs")
 
