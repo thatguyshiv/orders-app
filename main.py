@@ -105,9 +105,9 @@ if menu == "Add Order":
                 'Is Delivered': is_delivered,
                 'Message': message
             }
-            new_order_df = pd.DataFrame([new_order])  # Convert the new order dictionary to a DataFrame
-orders_df = pd.concat([orders_df, new_order_df], ignore_index=True)  # Concatenate the new order with the existing DataFrame
-            orders_df.to_excel(orders_file, index=False)
+            new_order_df = pd.DataFrame([new_order])  # Create DataFrame from the new order dictionary
+            orders_df = pd.concat([orders_df, new_order_df], ignore_index=True)  # Concatenate new order to existing DataFrame
+            orders_df.to_excel(orders_file, index=False)  # Save the updated DataFrame to the Excel file
             st.success("Order added successfully!")
 
 elif menu == "Add Product":
