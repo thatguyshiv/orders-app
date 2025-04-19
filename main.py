@@ -66,6 +66,10 @@ if menu == "Add Order":
             if is_delivered:
                 is_printed = True
 
+            # Convert boolean values to "Y" or "N"
+            is_printed = "Y" if is_printed else "N"
+            is_delivered = "Y" if is_delivered else "N"
+
             # Add order to DataFrame
             new_order = {
                 'Customer Name': customer_name,
@@ -123,11 +127,15 @@ elif menu == "Update Order":
                 delivery_date = st.date_input("Delivery Date", value=pd.to_datetime(order_to_update["Delivery Date"]))
                 assigned_to = st.text_input("Assigned To", value=order_to_update["Assigned To"])
                 message = st.text_area("Message", value=order_to_update["Message"])
-                is_printed = st.checkbox("Is Printed", value=order_to_update["Is Printed"])
-                is_delivered = st.checkbox("Is Delivered", value=order_to_update["Is Delivered"])
+                is_printed = st.checkbox("Is Printed", value=order_to_update["Is Printed"] == "Y")
+                is_delivered = st.checkbox("Is Delivered", value=order_to_update["Is Delivered"] == "Y")
                 update = st.form_submit_button("Update Order")
 
             if update:
+                # Convert boolean values to "Y" or "N"
+                is_printed = "Y" if is_printed else "N"
+                is_delivered = "Y" if is_delivered else "N"
+
                 # Update the DataFrame
                 orders_df.at[order_index, "Customer Name"] = customer_name
                 orders_df.at[order_index, "Filament Color"] = filament_color
