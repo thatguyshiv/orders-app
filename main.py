@@ -94,9 +94,34 @@ if menu == "Add Order":
             product_name = product['Product Name'].values[0]
             grams_used = product['Grams Used'].values[0]
             sale_price = product['Sale Price'].values[0]
+
+            # Debugging: Display retrieved product details
+            st.write("Product Details:")
+            st.write("Grams Used:", grams_used)
+            st.write("Sale Price:", sale_price)
+
+            # Retrieve filament cost per gram (default to 0.10 if color is not found)
             filament_cost_per_gram = filament_costs.get(filament_color, 0.10)
+
+            # Debugging: Display filament cost per gram
+            st.write("Filament Cost Per Gram:", filament_cost_per_gram)
+
+            # Ensure all values are numeric
+            try:
+                grams_used = float(grams_used)
+                filament_cost_per_gram = float(filament_cost_per_gram)
+                sale_price = float(sale_price)
+            except ValueError:
+                st.error("Error: Invalid numeric values for calculations.")
+                return
+
+            # Calculate cost and profit
             cost = grams_used * filament_cost_per_gram
             profit = sale_price - cost
+
+            # Debugging: Display calculated cost and profit
+            st.write("Calculated Cost:", cost)
+            st.write("Calculated Profit:", profit)
 
             # Automatically check "Is Printed" if "Is Delivered" is checked
             if is_delivered:
