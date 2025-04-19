@@ -4,6 +4,25 @@ import pandas as pd
 # File paths for Excel files
 product_db_file = 'product_database.xlsx'
 orders_file = 'orders.xlsx'
+filament_costs_file = 'filament_costs.csv'
+
+# Default filament costs (if the file doesn't exist)
+default_filament_costs = {
+    "Blue": 0.10,
+    "Pink": 0.12,
+    "White": 0.08,
+    "Black": 0.11
+}
+
+# Load filament costs
+try:
+    filament_costs_df = pd.read_csv(filament_costs_file)
+    filament_costs = dict(zip(filament_costs_df['Color'], filament_costs_df['Cost']))
+except FileNotFoundError:
+    # Create default filament costs file
+    filament_costs_df = pd.DataFrame(list(default_filament_costs.items()), columns=['Color', 'Cost'])
+    filament_costs_df.to_csv(filament_costs_file, index=False)
+    filament_costs = default_filament_costs
 
 # Ensure product database structure
 product_columns = ['Product Code', 'Product Name', 'Grams Used', 'Sale Price']
@@ -13,7 +32,7 @@ except FileNotFoundError:
     product_df = pd.DataFrame(columns=product_columns)
     product_df.to_excel(product_db_file, index=False)
 
-# Ensure orders file structure
+# Ensure orders database structure
 order_columns = [
     'Customer Name', 'Product Code', 'Product Name', 'Filament Color',
     'Order Date', 'Delivery Date', 'Assigned To', 'Cost', 'Profit',
@@ -32,7 +51,7 @@ except FileNotFoundError:
 # Streamlit App
 st.title("Order Management System")
 
-menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order"])
+menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order", "Update Filament Costs"])
 
 if menu == "Add Order":
     st.header("Add New Order")
@@ -41,7 +60,7 @@ if menu == "Add Order":
     with st.form("add_order_form"):
         customer_name = st.text_input("Customer Name")
         product_code = st.selectbox("Product Code", product_df['Product Code'].tolist())
-        filament_color = st.selectbox("Filament Color", ["Blue", "Pink", "White", "Black"])
+        filament_color = st.selectbox("Filament Color", list(filament_costs.keys()))
         order_date = st.date_input("Order Date")
         delivery_date = st.date_input("Delivery Date")
         assigned_to = st.text_input("Assigned To")
@@ -59,7 +78,8 @@ if menu == "Add Order":
             product_name = product['Product Name'].values[0]
             grams_used = product['Grams Used'].values[0]
             sale_price = product['Sale Price'].values[0]
-            cost = grams_used * 0.10  # Example: fixed cost per gram
+            filament_cost_per_gram = filament_costs.get(filament_color, 0.10)
+            cost = grams_used * filament_cost_per_gram
             profit = sale_price - cost
 
             # Automatically check "Is Printed" if "Is Delivered" is checked
@@ -177,12 +197,14 @@ elif menu == "Update Order":
                 orders_df.to_excel(orders_file, index=False)
                 st.success("Order updated successfully!")
 
-elif menu == "View Orders":
-    st.header("View Orders")
-    orders_df = pd.read_excel(orders_file)
-    st.dataframe(orders_df)
+elif menu == "Update Filament Costs":
+    st.header("Update Filament Costs")
 
-elif menu == "View Products":
-    st.header("View Products")
-    product_df = pd.read_excel(product_db_file)
-    st.dataframe(product_df)
+    # Display current filament costs
+    st.subheader("Current Filament Costs")
+    filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
+    st.table(filament_costs_df)
+
+    # Form for updating existing costs
+    st.subheader("Update Existing Color Cost")
+    with st.form("update_cost_form"):
