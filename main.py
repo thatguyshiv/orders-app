@@ -63,6 +63,8 @@ if os.path.exists(orders_file):
         # Handle the case where the file exists but is unreadable
         orders_df = pd.DataFrame(columns=order_columns)
 else:
+    global orders_df
+
     # If the file doesn't exist, create it with the required columns
     orders_df = pd.DataFrame(columns=order_columns)
     orders_df.to_excel(orders_file, index=False)
