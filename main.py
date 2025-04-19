@@ -203,4 +203,6 @@ elif menu == "Update Filament Costs":
     # Display current filament costs
     st.subheader("Current Filament Costs")
     filament_costs_df = pd.DataFrame(list(filament_costs.items()), columns=['Color', 'Cost'])
-    st
+    st.table(filament_costs_df)
+
+    # Form for updating existing costs
