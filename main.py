@@ -54,6 +54,8 @@ order_columns = [
 ]
 if os.path.exists(orders_file):
     # If the file exists, load it
+    global orders_df
+
     try:
         orders_df = pd.read_excel(orders_file)
     except Exception as e:
@@ -174,7 +176,8 @@ elif menu == "Add Product":
 
 elif menu == "View Orders":
     st.header("View Orders")
-    
+    global orders_df
+
     try:
         orders_df = pd.read_excel(orders_file)
         st.subheader("Order Details")
