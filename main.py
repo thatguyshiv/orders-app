@@ -72,6 +72,9 @@ menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", 
 if menu == "Add Order":
     st.header("Add New Order")
     
+    # Declare global orders_df
+    global orders_df
+
     # Form for adding order
     with st.form("add_order_form"):
         customer_name = st.text_input("Customer Name")
@@ -86,14 +89,11 @@ if menu == "Add Order":
         submit = st.form_submit_button("Add Order")
 
     if submit:
-        # Declare global orders_df before using or modifying it
-        global orders_df
-
         # Fetch product details
         product = product_df.loc[product_df['Product Code'] == product_code]
         if product.empty:
             st.error("Error: Product not found. Please add the product first.")
-            return  # Exit the execution early to prevent further processing
+            return  # Exit early to prevent further processing
 
         # Retrieve product details
         product_name = product['Product Name'].values[0]
