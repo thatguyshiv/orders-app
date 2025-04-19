@@ -51,7 +51,7 @@ except FileNotFoundError:
 # Streamlit App
 st.title("Order Management System")
 
-menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order", "Update Filament Costs"])
+menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order", "Update Product", "Update Filament Costs"])
 
 if menu == "Add Order":
     st.header("Add New Order")
