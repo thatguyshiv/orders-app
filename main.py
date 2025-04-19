@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+import os
 # File paths for Excel files
 product_db_file = 'product_database.xlsx'
 orders_file = 'orders.xlsx'
