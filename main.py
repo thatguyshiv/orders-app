@@ -132,8 +132,9 @@ elif menu == "Add Product":
                 'Grams Used': grams_used,
                 'Sale Price': sale_price
             }
-            product_df = product_df.append(new_product, ignore_index=True)
-            product_df.to_excel(product_db_file, index=False)
+            new_product_df = pd.DataFrame([new_product])  # Create a DataFrame from the new product dictionary
+            product_df = pd.concat([product_df, new_product_df], ignore_index=True)  # Concatenate to the existing DataFrame
+            product_df.to_excel(product_db_file, index=False)  # Save the updated DataFrame to the Excel file
             st.success("Product added successfully!")
 
 elif menu == "View Orders":
