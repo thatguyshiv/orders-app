@@ -69,7 +69,7 @@ st.title("Order Management System")
 
 menu = st.sidebar.selectbox("Menu", ["Add Order", "Add Product", "View Orders", "View Products", "Update Order", "Update Product", "Update Filament Costs"])
 
-elif menu == "Add Order":
+if menu == "Add Order":
     st.header("Add New Order")
     
     # Form for adding order
