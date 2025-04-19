@@ -15,39 +15,55 @@ default_filament_costs = {
 }
 
 # Load filament costs
-try:
-    filament_costs_df = pd.read_csv(filament_costs_file)
-    filament_costs = dict(zip(filament_costs_df['Color'], filament_costs_df['Cost']))
-except (FileNotFoundError, pd.errors.EmptyDataError):
-    # Create default filament costs file
+if os.path.exists(filament_costs_file):
+    # If the file exists, load it
+    try:
+        filament_costs_df = pd.read_csv(filament_costs_file)
+        filament_costs = dict(zip(filament_costs_df['Color'], filament_costs_df['Cost']))
+    except Exception as e:
+        st.error(f"Error reading {filament_costs_file}: {e}")
+        # Handle the case where the file exists but is unreadable
+        filament_costs_df = pd.DataFrame(list(default_filament_costs.items()), columns=['Color', 'Cost'])
+else:
+    # If the file doesn't exist, create it with the required defaults
     filament_costs_df = pd.DataFrame(list(default_filament_costs.items()), columns=['Color', 'Cost'])
     filament_costs_df.to_csv(filament_costs_file, index=False)
     filament_costs = default_filament_costs
 
 # Ensure product database structure
 product_columns = ['Product Code', 'Product Name', 'Grams Used', 'Sale Price']
-try:
-    product_df = pd.read_excel(product_db_file)
-except FileNotFoundError:
+import os  # Add this import to your script
+
+if os.path.exists(product_db_file):
+    # If the file exists, load it
+    try:
+        product_df = pd.read_excel(product_db_file)
+    except Exception as e:
+        st.error(f"Error reading {product_db_file}: {e}")
+        # Handle the case where the file exists but is unreadable
+        product_df = pd.DataFrame(columns=product_columns)
+else:
+    # If the file doesn't exist, create it with the required columns
     product_df = pd.DataFrame(columns=product_columns)
     product_df.to_excel(product_db_file, index=False)
-
 # Ensure orders database structure
 order_columns = [
     'Customer Name', 'Product Code', 'Product Name', 'Filament Color',
     'Order Date', 'Delivery Date', 'Assigned To', 'Cost', 'Profit',
     'Is Printed', 'Is Delivered', 'Message'
 ]
-try:
-    orders_df = pd.read_excel(orders_file)
-    # Add missing columns if necessary
-    for col in order_columns:
-        if col not in orders_df.columns:
-            orders_df[col] = None
-except FileNotFoundError:
+if os.path.exists(orders_file):
+    # If the file exists, load it
+    try:
+        orders_df = pd.read_excel(orders_file)
+    except Exception as e:
+        st.error(f"Error reading {orders_file}: {e}")
+        # Handle the case where the file exists but is unreadable
+        orders_df = pd.DataFrame(columns=order_columns)
+else:
+    # If the file doesn't exist, create it with the required columns
     orders_df = pd.DataFrame(columns=order_columns)
     orders_df.to_excel(orders_file, index=False)
-
 # Streamlit App
 st.title("Order Management System")
 
